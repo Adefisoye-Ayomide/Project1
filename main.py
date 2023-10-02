@@ -2,12 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from euler_method import Euler_method
 from runge_kutta_method import Runge_kutta
-from viscous_decay import Viscous
 
-# # Define the ODE function: dv/dt = -v/tau
-# def viscous_decay(v, t, tau):
-#     dvdt = -v / tau
-#     return dvdt
+# Define the ODE function: dv/dt = -v/tau
+def viscous_decay(v, t, tau):
+    dvdt = -v / tau
+    return dvdt
 
 # Function to solve and plot the ODE with user input
 def solve_and_plot_with_user_input():
@@ -20,8 +19,11 @@ def solve_and_plot_with_user_input():
     t_span = np.linspace(t_start, t_end, num_points)
 
     try:
-        v_euler = Euler_method(v0, t_span, tau)
-        v_rk = Runge_kutta(v0, t_span, tau)
+        euler = Euler_method()  #Create an instance of Euler_method
+        v_euler = euler.calculate_euler_method(v0, t_span, tau) #call its method
+
+        rk = Runge_kutta() #Create an instance of Runge_kutta
+        v_rk = rk.calculate_runge_kutta_method(v0, t_span, tau) #call its method
     except ValueError as e:
         print(f"Error: {e}")
         return
@@ -48,8 +50,12 @@ def solve_and_plot_with_default_values():
     t_span = np.linspace(t_start, t_end, num_points)
 
     try:
-        v_euler = Euler_method(v0, t_span, tau)
-        v_rk = Runge_kutta(v0, t_span, tau)
+        euler = Euler_method()  #Create an instance of Euler_method
+        v_euler = euler.calculate_euler_method(v0, t_span, tau) #call its method
+
+        rk = Runge_kutta() #Create an instance of Runge_kutta
+        v_rk = rk.calculate_runge_kutta_method(v0, t_span, tau) #call its method
+
     except ValueError as e:
         print(f"Error: {e}")
         return

@@ -1,85 +1,86 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from euler_method import Euler_method
-from runge_kutta_method import Runge_kutta
+from scipy.integrate import quad
+from Riemann import RiemannSum
+from Trapezoid import TrapezoidalRule
+from Simpson import SimpsonsRule
 
-# Define the ODE function: dv/dt = -v/tau
-def viscous_decay(v, t, tau):
-    dvdt = -v / tau
-    return dvdt
+# Define the density function ρ(x)
+def density_function(x):
+    return x 
 
-# Function to solve and plot the ODE with user input
-def solve_and_plot_with_user_input():
-    v0 = float(input("Enter initial velocity (m/s): "))
-    tau = float(input("Enter time constant (s): "))
-    t_start = float(input("Enter start time (s): "))
-    t_end = float(input("Enter end time (s): "))
-    num_points = int(input("Enter the number of time points: "))
+def input_density_function():
+    while True:
+        try:
+            expression = input("Enter a linear function for ρ(x) (e.g., '2*x + 3'): ")
+            rho_function = lambda x: eval(expression)
+            if callable(rho_function):
+                return rho_function
+            else:
+                print("Invalid input. Please enter a valid linear function.")
+        except Exception as e:
+            print(f"Invalid input. Please enter a valid linear function. Error: {e}")
 
-    t_span = np.linspace(t_start, t_end, num_points)
+#Function to validate and parse the integration limits input
+def input_integration_limits():
+    while True:
+        try:
+            a = float(input("Enter lower limit of integration (a): "))
+            b = float(input("Enter upper limit of integration (b): "))
+            if a < b:
+                return a, b
+            else:
+                print("Invalid input. Lower limit should be less than upper limit.")
+        except ValueError:
+            print("Invalid input. Please enter numerical values.")
 
-    try:
-        euler = Euler_method()  #Create an instance of Euler_method
-        v_euler = euler.calculate_euler_method(v0, t_span, tau) #call its method
+a = 0
+b = 2
 
-        rk = Runge_kutta() #Create an instance of Runge_kutta
-        v_rk = rk.calculate_runge_kutta_method(v0, t_span, tau) #call its method
-    except ValueError as e:
-        print(f"Error: {e}")
-        return
+# Ask the user if they want to input custom values or use defaults
+user_choice = input("Do you want to enter custom parameters? (yes/no): ").strip().lower()
+if user_choice == "yes":
+    density_function = input_density_function()
+    a, b = input_integration_limits()
 
-    # Plot the results
-    plt.figure(figsize=(10, 6))
-    plt.plot(t_span, v_euler, label="Euler's Method")
-    plt.plot(t_span, v_rk, label="4th Order Runge-Kutta")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Velocity (m/s)")
-    plt.legend()
-    plt.title("Decay of Momentum in a Viscous Fluid")
-    plt.grid(True)
-    plt.show()
+# Calculate the definite integral using different methods
+num_points = 1000
 
-# Function to solve and plot the ODE with default values
-def solve_and_plot_with_default_values():
-    v0 = 2.0
-    tau = 1.0
-    t_start = 0.0   
-    t_end = 10.0
-    num_points = 100
+# Using Riemann Sum
+riemann_sum_calculator = RiemannSum()
+integral_riemann = riemann_sum_calculator.calculate(density_function, a, b, num_points)
 
-    t_span = np.linspace(t_start, t_end, num_points)
+# Using Trapezoidal Rule
+trapezoidal_rule_calculator = TrapezoidalRule()
+integral_trapezoidal = trapezoidal_rule_calculator.calculate(density_function, a, b, num_points)
 
-    try:
-        euler = Euler_method()  #Create an instance of Euler_method
-        v_euler = euler.calculate_euler_method(v0, t_span, tau) #call its method
+# Using Simpson's Rule
+simpsons_rule_calculator = SimpsonsRule()
+integral_simpsons = simpsons_rule_calculator.calculate(density_function, a, b, num_points)
 
-        rk = Runge_kutta() #Create an instance of Runge_kutta
-        v_rk = rk.calculate_runge_kutta_method(v0, t_span, tau) #call its method
+integral_scipy, _ = quad(density_function, a, b)
 
-    except ValueError as e:
-        print(f"Error: {e}")
-        return
+# Compare with the analytic solution (if available)
+analytic_result = (b**2 - a**2) / 2.0  # Analytic solution for x^2
 
-    # Plot the results
-    plt.figure(figsize=(10, 6))
-    plt.plot(t_span, v_euler, label="Euler's Method")
-    plt.plot(t_span, v_rk, label="4th Order Runge-Kutta")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Velocity (m/s)")
-    plt.legend()
-    plt.title("Decay of Momentum in a Viscous Fluid")
-    plt.grid(True)
-    plt.show()
+# Print the results
+print(f"Riemann Sum: {integral_riemann}")
+print(f"Trapezoidal Rule: {integral_trapezoidal}")
+print(f"Simpson's Rule: {integral_simpsons}")
+print(f"Scipy Integration: {integral_scipy}")
+# print(f"Analytic Solution: {analytic_result}")
 
-# Main function to choose between user input and default values
-def main():
-    choice = input("Do you want to enter custom parameters? (yes/no): ").strip().lower()
-    if choice == "yes":
-        solve_and_plot_with_user_input()
-    elif choice == "no":
-        solve_and_plot_with_default_values()
-    else:
-        print("Invalid choice. Please enter 'yes' or 'no'.")
+# Plot the density function
+x_values = np.linspace(a, b, 1000)
+y_values = [density_function(x) for x in x_values]
 
-if __name__ == "__main__":
-    main()
+plt.figure(figsize=(10, 6))
+plt.plot(x_values, y_values, label="Density Function")
+plt.fill_between(x_values, 0, y_values, where=[a <= x <= b for x in x_values], alpha=0.2, label="Integral Area")
+plt.xlabel("x")
+plt.ylabel("Density ρ(x)")
+plt.legend()
+plt.title("Definite Integral of Density Function")
+plt.grid(True)
+plt.show()
+

@@ -1,3 +1,5 @@
+#Computational Physics Project1 Repository
+
 Welcome to my computational physics project1. The goal of the project is to numerically solve a 1D ODE and a simple integral using methods like euler approximations, runge-kutta, trapezoid rule, etc., make sense of the physics behind it, and then compare the result with the result obtained from using a standard library like scipy.
 To run this program, there are certain prereuqisites that must be met on your machine. Ensure you have the following installed: 
 - Python 3
